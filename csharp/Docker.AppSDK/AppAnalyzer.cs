@@ -59,7 +59,7 @@ namespace Docker.AppSDK
             }
         }
 
-        internal async Task Build(AppBuilder appBuilder)
+        public async Task Build(AppBuilder appBuilder)
         {
             // starts with deps
             foreach(var dep in Dependencies) {

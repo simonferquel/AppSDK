@@ -2,7 +2,7 @@
   "profiles": {
     "Docker.AppFrontend": {
       "commandName": "Project",
-      "commandLineArgs": "--assemblies=..\\SampleAppLib\\bin\\Debug\\netstandard2.0\\SampleAppLib.dll serve"
+      "commandLineArgs": "--assemblies=C:\\gohome\\src\\github.com\\simonferquel\\AppSDK\\csharp\\SampleAppLib\\bin\\Debug\\netstandard2.0\\SampleAppLib.dll serve"
     }
   }
 }

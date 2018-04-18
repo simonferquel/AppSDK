@@ -10,6 +10,9 @@ type Cli struct {
 }
 
 func (c *Cli) Initialize(address string) error {
+	if address == "" {
+		return nil
+	}
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		return err

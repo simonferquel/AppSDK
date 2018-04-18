@@ -4,3 +4,5 @@
 PublishProfiles/
 bin/
 obj/
+*.exe
+*.dll

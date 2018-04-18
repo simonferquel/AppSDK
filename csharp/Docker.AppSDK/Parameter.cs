@@ -42,5 +42,7 @@ namespace Docker.AppSDK
                 }
             }
         }
+
+        public Type ParameterType => _pi.PropertyType;
     }
 }

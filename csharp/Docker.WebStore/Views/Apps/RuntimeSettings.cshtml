@@ -1,0 +1,66 @@
+﻿@model Docker.WebStore.Models.ConfigureAppModel
+
+@{
+    ViewData["Title"] = "Runtime settings";
+}
+
+<h2>Runtime settings</h2>
+
+<h4>@Model.Name</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="POST" asp-action="deploy" asp-controller="apps" asp-route-fullTypeName="@Model.AppType.AssemblyQualifiedName">
+            @for (int i = 0; i < Model.Parameters.Count; ++i) {
+        <input asp-for="Parameters[i].Value" type="hidden" />
+}
+
+            @for (int depIX = 0; depIX < Model.Dependencies.Count; ++depIX) {
+        @for (int i = 0; i < Model.Dependencies[depIX].Parameters.Count; ++i) {
+        <input asp-for="Dependencies[depIX].Parameters[i].Value" type="hidden" />
+}
+}
+            @for (int ix = 0; ix < Model.RuntimeSettings.Count; ++ix) {
+
+        <div class="form-group">
+            <input asp-for="RuntimeSettings[ix].Name" type="hidden" />
+            <h5>@Model.RuntimeSettings[ix].Name</h5>
+            @if (Model.RuntimeSettings[ix].Scalable) {
+        <label class="control-label">Replicas</label>
+        <div>Number of instances of this service</div>
+        <input asp-for="RuntimeSettings[ix].Scale" class="form-control" />
+}
+            <label class="form-control">
+                <input type="checkbox" asp-for="RuntimeSettings[ix].SetLimits" data-toggle="collapse" data-target="#limits-@ix" />
+                Apply runtime limits
+            </label>
+            <div class="collapse" id="limits-@ix">
+                <label class="control-label">CPU</label>
+                <div>CPU limit in NanoCPU units</div>
+                <input asp-for="RuntimeSettings[ix].CpuLimit" class="form-control" />
+                <label class="control-label">Memory</label>
+                <div>Memory limit in bytes</div>
+                <input asp-for="RuntimeSettings[ix].MemoryLimit" class="form-control" />
+            </div>
+        </div>
+}
+        <div class="form-group">
+            <label class="control-label">Deployment name</label>
+            <div>Name of the generated stack</div>
+            <input asp-for="DeploymentName" class="form-control" />
+        </div>
+
+            <div class="form-group">
+                <input type="submit" value="Deploy" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

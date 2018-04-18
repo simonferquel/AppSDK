@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Docker.WebStore.Models.AssemblyModel>
+
+@{
+    ViewData["Title"] = "List";
+}
+
+<h2>List</h2>
+
+
+
+@foreach (var item in Model) {
+    <h3>@item.Name (@item.Version)</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Author</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var app in item.Apps){
+            <tr>
+                <td>
+                    <a asp-controller="Apps" asp-action="Configure" asp-route-fullTypeName="@app.App.GetType().AssemblyQualifiedName">@app.Name</a>
+                </td>
+                <td>
+                    @app.Version
+                </td>
+                <td>
+                    @app.Author
+                </td>
+                <td>
+                    @app.Description
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h3>Upload app libraries</h3>
+
+<form method="post" enctype="multipart/form-data" asp-action="UploadAssemblies">
+    <div class="form-group">
+        <div class="col-md-10">
+            <p>Upload one or more files:</p>
+            <input type="file" name="files" multiple />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            <input type="submit" value="Upload" />
+        </div>
+    </div>
+</form>

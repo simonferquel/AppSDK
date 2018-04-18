@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +10,7 @@ import (
 
 	v1beta2cli "github.com/docker/cli/kubernetes/client/clientset/typed/compose/v1beta2"
 	"github.com/docker/cli/kubernetes/compose/v1beta2"
+	"github.com/golang/protobuf/proto"
 	"github.com/simonferquel/AppSDK/pkg/cli"
 	"github.com/simonferquel/AppSDK/pkg/frontendclient"
 	"github.com/spf13/cobra"
@@ -147,29 +147,32 @@ func newDeployCommand(cli *cli.Cli) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			resp, err := cli.FrontendCli.RenderApp(context.Background(),
-				&frontendclient.RenderAppRequest{
-					Name:            args[0],
-					ParameterValues: o.settings,
-				})
-			if err != nil {
-				return err
-			}
-			if opts.renderOnly {
-				js, err := json.MarshalIndent(resp, "", "  ")
+
+			var app *frontendclient.App
+			if args[0] == "-" {
+				// deserialize stdin
+				app = &frontendclient.App{}
+				bytes, err := ioutil.ReadAll(os.Stdin)
 				if err != nil {
 					return err
 				}
-				fmt.Println(string(js))
-
-				if o.runtimeConfig != nil {
-					fmt.Printf("%#v\n", o.runtimeConfig)
+				if err = proto.Unmarshal(bytes, app); err != nil {
+					return err
 				}
-				return nil
+			} else {
+				app, err = cli.FrontendCli.RenderApp(context.Background(),
+					&frontendclient.RenderAppRequest{
+						Name:            args[0],
+						ParameterValues: o.settings,
+					})
+				if err != nil {
+					return err
+				}
 			}
+
 			if opts.genRuntimeParameters {
 				fmt.Print("runtime:\n")
-				for _, svc := range resp.Services {
+				for _, svc := range app.Services {
 					fmt.Printf("  %s:\n", svc.Name)
 					if svc.ScalabilityModel == frontendclient.ScalabilityModel_Scalable {
 						fmt.Print("    scale: 1\n")
@@ -187,7 +190,7 @@ func newDeployCommand(cli *cli.Cli) *cobra.Command {
 			stack := &v1beta2.Stack{}
 			stack.Name = o.name
 			stack.Spec = &v1beta2.StackSpec{}
-			for _, svc := range resp.Services {
+			for _, svc := range app.Services {
 				stackSvc := v1beta2.ServiceConfig{
 					Name:        svc.Name,
 					Image:       svc.Image,
@@ -211,7 +214,7 @@ func newDeployCommand(cli *cli.Cli) *cobra.Command {
 				stack.Spec.Services = append(stack.Spec.Services, stackSvc)
 			}
 
-			cfg, err := clientcmd.BuildConfigFromFlags("", "c:\\users\\simon\\.kube\\config")
+			cfg, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
 			if err != nil {
 				return err
 			}
