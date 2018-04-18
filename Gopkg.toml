@@ -1,0 +1,27 @@
+[[constraint]]
+    name = "github.com/spf13/cobra"
+    version = "v0.0.2"
+
+[[constraint]]
+    name = "github.com/docker/cli"
+    source = "https://github.com/silvin-lubecki/cli.git"
+    branch = "handle-multiple-stack-api-versions"
+
+[[override]]
+    name = "k8s.io/api"
+    version = "kubernetes-1.8.2"
+[[override]]
+    name = "k8s.io/apimachinery"
+    version = "kubernetes-1.8.2"
+[[override]]
+    name = "k8s.io/client-go"
+    version = "kubernetes-1.8.2"
+[[override]]
+    name = "k8s.io/kubernetes"
+    version = "v1.8.2"
+
+[prune]
+    non-go = true
+    go-tests = true
+    unused-packages = true
+

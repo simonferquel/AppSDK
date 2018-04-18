@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package Docker.AppSDK;
+
+enum ScalabilityModel {
+    Scalable = 0;
+    Singleton = 1;
+    Global = 2;
+}
+enum PortKind {
+    Unspecified = 0;
+    TCP = 0x1;
+    UDP = 0x2;
+    Both = 0x3;
+}
+
+message ExposedPort{
+    int32 ContainerPort = 1;
+    int32 PublicPort = 2;
+    PortKind Kind = 3;
+}
+
+message Service{
+    string Name = 1;
+    string Image = 2;
+    repeated string Command = 3;
+    map<string,string> Env = 4;
+    ScalabilityModel ScalabilityModel = 5;
+    repeated ExposedPort Ports = 6;
+}
+
+message App {
+    repeated Service Services = 1;
+}
+
+message AppMeta{
+    repeated string Names = 1;
+    string Version = 2;
+    string Author = 3;
+    map<string, AppMeta> Dependencies = 4;
+    string Description = 5;
+}
+
+message StringMessage{
+    string Data = 1;
+}
+
+message ListAppResponse{
+    repeated AppMeta Apps = 1;
+}
+
+message RenderAppRequest{
+    string Name = 1;
+    string ParameterValues = 2;
+}
+
+service AppFrontend{
+    rpc ListApps (StringMessage) returns (ListAppResponse);
+    rpc GetApp (StringMessage) returns (AppMeta);
+    rpc GetAppSettingsTemplate(StringMessage) returns (StringMessage);
+    rpc RenderApp(RenderAppRequest) returns (App);
+}

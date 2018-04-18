@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Docker.AppFrontend": {
+      "commandName": "Project",
+      "commandLineArgs": "--assemblies=..\\SampleAppLib\\bin\\Debug\\netstandard2.0\\SampleAppLib.dll serve"
+    }
+  }
+}
