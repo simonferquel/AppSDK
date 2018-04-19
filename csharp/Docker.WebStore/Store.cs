@@ -14,7 +14,7 @@ namespace Docker.WebStore
         private readonly string _tmpDir;
         private readonly Random _rand = new Random();
 
-        private readonly SortedSet<Assembly> _assemblies = new SortedSet<Assembly>();
+        private readonly SortedSet<Assembly> _assemblies = new SortedSet<Assembly>(Comparer<Assembly>.Create((lhs, rhs)=>string.Compare(lhs?.FullName, rhs?.FullName)));
 
         public Store(string asmDir, string tmpDir)
         {
