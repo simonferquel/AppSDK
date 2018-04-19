@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  docker.webstore:
+    image: dockerwebstore
+    build:
+      context: .
+      dockerfile: Docker.WebStore/Dockerfile

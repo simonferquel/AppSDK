@@ -16,16 +16,26 @@ namespace Docker.WebStore.Controllers
     public class AppsController : Controller
     {
         private readonly BackendService _backend;
+        private readonly Store _store;
 
-        public AppsController(BackendService backend)
+        public AppsController(BackendService backend, Store store)
         {
             _backend = backend;
+            _store = store;
+        }
+
+        private Type ResolveAppType(string fullName)
+        {
+            var asmName = fullName.Substring(fullName.IndexOf(",")+2);
+            var typeName = fullName.Substring(0, fullName.IndexOf(","));
+            var asm = _store.List().First(a => a.FullName == asmName);
+            return asm.GetType(typeName);
         }
 
         [Route("configure/{fullTypeName}")]
         public async Task<IActionResult> Configure(string fullTypeName)
         {
-            var app = (IApp)Activator.CreateInstance(Type.GetType(fullTypeName));
+            var app = (IApp)Activator.CreateInstance(ResolveAppType(fullTypeName));
             var analyzer = new AppAnalyzer(app);
             var model = new ConfigureAppModel();
             await model.InitializeAsync(analyzer);
@@ -36,7 +46,7 @@ namespace Docker.WebStore.Controllers
         [Route("runtime-settings/{fullTypeName}")]
         public async Task<IActionResult> RuntimeSettings(string fullTypeName, ConfigureAppModel model)
         {
-            var app = (IApp)Activator.CreateInstance(Type.GetType(fullTypeName));
+            var app = (IApp)Activator.CreateInstance(ResolveAppType(fullTypeName));
             var analyzer = new AppAnalyzer(app);
             model.ApplyTo(analyzer);
             model = new ConfigureAppModel();
@@ -49,7 +59,7 @@ namespace Docker.WebStore.Controllers
         public async Task<IActionResult> Deploy(string fullTypeName, ConfigureAppModel model)
         {
 
-            var app = (IApp)Activator.CreateInstance(Type.GetType(fullTypeName));
+            var app = (IApp)Activator.CreateInstance(ResolveAppType(fullTypeName));
             var analyzer = new AppAnalyzer(app);
             model.ApplyTo(analyzer);
 

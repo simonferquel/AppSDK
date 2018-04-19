@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-webstore
+  labels:
+    app: docker-webstore
+spec:
+  ports:
+  - port: 80
+    name: web
+  type: LoadBalancer
+  selector:
+    app: docker-webstore
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: docker-webstore
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: docker-webstore:clusteradmin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ClusterAdmin
+subjects:
+- kind: ServiceAccount
+  name: docker-webstore
+  namespace: default
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: docker-webstore
+spec:
+  serviceName: docker-webstore
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-webstore
+  template:
+    metadata:
+      labels:
+        app: docker-webstore
+    spec:
+      serviceAccount: docker-webstore
+      containers:
+      - name: docker-webstore
+        image: docker-webstore
+        imagePullPolicy: Never
+        env: 
+        - name: BackendService.Exe
+          value: /backend
+        - name: Store.AsmDir
+          value: /store/assemblies
+        - name: Store.TempDir
+          value: /store/temp
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: store
+          mountPath: /store
+  volumeClaimTemplates:
+  - metadata:
+      name: store
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
