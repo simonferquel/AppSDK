@@ -4,62 +4,75 @@
     ViewData["Title"] = "Runtime settings";
 }
 
-<h2>Runtime settings</h2>
+<h2>@Model.Name - Runtime settings</h2>
 
-<h4>@Model.Name</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="POST" asp-action="deploy" asp-controller="apps" asp-route-fullTypeName="@Model.AppType.AssemblyQualifiedName">
-            @for (int i = 0; i < Model.Parameters.Count; ++i) {
+<form method="POST" asp-action="deploy" asp-controller="apps" asp-route-fullTypeName="@Model.AppType.AssemblyQualifiedName">
+    @for (int i = 0; i < Model.Parameters.Count; ++i) {
         <input asp-for="Parameters[i].Value" type="hidden" />
-}
+    }
 
-            @for (int depIX = 0; depIX < Model.Dependencies.Count; ++depIX) {
+    @for (int depIX = 0; depIX < Model.Dependencies.Count; ++depIX) {
         @for (int i = 0; i < Model.Dependencies[depIX].Parameters.Count; ++i) {
-        <input asp-for="Dependencies[depIX].Parameters[i].Value" type="hidden" />
-}
-}
-            @for (int ix = 0; ix < Model.RuntimeSettings.Count; ++ix) {
-
-        <div class="form-group">
-            <input asp-for="RuntimeSettings[ix].Name" type="hidden" />
-            <h5>@Model.RuntimeSettings[ix].Name</h5>
-            @if (Model.RuntimeSettings[ix].Scalable) {
-        <label class="control-label">Replicas</label>
-        <div>Number of instances of this service</div>
-        <input asp-for="RuntimeSettings[ix].Scale" class="form-control" />
-}
-            <label class="form-control">
-                <input type="checkbox" asp-for="RuntimeSettings[ix].SetLimits" data-toggle="collapse" data-target="#limits-@ix" />
-                Apply runtime limits
-            </label>
-            <div class="collapse" id="limits-@ix">
-                <label class="control-label">CPU</label>
-                <div>CPU limit in NanoCPU units</div>
-                <input asp-for="RuntimeSettings[ix].CpuLimit" class="form-control" />
-                <label class="control-label">Memory</label>
-                <div>Memory limit in bytes</div>
-                <input asp-for="RuntimeSettings[ix].MemoryLimit" class="form-control" />
+            <input asp-for="Dependencies[depIX].Parameters[i].Value" type="hidden" />
+        }
+    }
+    @for (int ix = 0; ix < Model.RuntimeSettings.Count; ++ix) {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">@Model.RuntimeSettings[ix].Name</h3>
+            </div>
+            <div class="panel-body form-horizontal">
+                <input asp-for="RuntimeSettings[ix].Name" type="hidden" />
+                @if (Model.RuntimeSettings[ix].Scalable) {
+                    <div class="row">
+                        <label class="control-label col-sm-2">Replicas</label>
+                        <div class="col-md-8">
+                            <input asp-for="RuntimeSettings[ix].Scale" class="form-control" />
+                            <span class="help-block">Number of instances of this service</span>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <label class="control-label col-sm-2">Apply runtime limits</label>
+                    <div class="col-md-8">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" asp-for="RuntimeSettings[ix].SetLimits" data-toggle="collapse" data-target="#limits-@ix" />
+                                Apply CPU / memory limits to containers running this service
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse" id="limits-@ix">
+                    <div class="row">
+                        <label class="control-label col-sm-2">CPU</label>
+                        <div class="col-md-8">
+                            <input asp-for="RuntimeSettings[ix].CpuLimit" class="form-control" />
+                            <span class="help-block">CPU limit in NanoCPU units</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="control-label col-sm-2">Memory</label>
+                        <div class="col-md-8">
+                            <input asp-for="RuntimeSettings[ix].MemoryLimit" class="form-control" />
+                            <span class="help-block">Memory limit in bytes</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-}
-        <div class="form-group">
-            <label class="control-label">Deployment name</label>
-            <div>Name of the generated stack</div>
-            <input asp-for="DeploymentName" class="form-control" />
-        </div>
-
-            <div class="form-group">
-                <input type="submit" value="Deploy" class="btn btn-default" />
-            </div>
-        </form>
+    }
+    <div class="form-group">
+        <label class="control-label">Deployment name</label>
+        <div>Name of the generated stack</div>
+        <input asp-for="DeploymentName" class="form-control" />
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <div class="form-group">
+        <input type="submit" value="Deploy" class="btn btn-default" />
+    </div>
+</form>
+
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

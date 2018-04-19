@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Docker.WebStore.Controllers
 {
-    [Route("libs")]
+    [Route("")]
     public class AppLibsController : Controller
     {
         private readonly Store _store;
